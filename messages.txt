@@ -1,3 +1,4 @@
+nature	message
 ham	Yup i've finished c ü there...
 ham	Remember to ask alex about his pizza
 ham	No da..today also i forgot..
