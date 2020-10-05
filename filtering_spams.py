@@ -29,17 +29,41 @@ Y_test = test_set["nature"]
 #print(Y_test)
 
 #creation of dictionnary
-def makeDictionnary(messageArray):
-    L=[] #Initialisation d'un liste vide
-    for i in messageArray.index:
-        #print(messageArray[i])
-        words = messageArray[i].split(' ')
+def makeDictionnary(messagesArray):
+    dictionnary=[] #Initialisation d'un liste vide
+    for i in messagesArray.index:
+        #print(messagesArray[i])
+        words = messagesArray[i].split(' ')
 
         #print(words)
         for k in words:
-            L.append(k)
-    print(L)
+            if(len(k)>2 and k.isalpha() == True):
+                dictionnary.append(k)
+    print(dictionnary)
+    return dictionnary
 
-makeDictionnary(X_training)
+#extraction of features
+def extract_features(dictionnary, X_training, X_test):
+    files = [os.path.join(mail_dir, fi) for fi in os.listdir(mail_dir)]
+    features_matrix = np.zeros((len(files), 3000))
+    docID = 0
+    for fil in files:
+        with open(fil) as fi:
+            for i, line in enumerate(fi):
+                if i == 2:
+                    words = line.split()
+                    for word in words:
+                        wordID = 0
+                        for i, d in enumerate(dictionary):
+                            if d[0] == word:
+                                wordID = i
+                                features_matrix[docID, wordID] = words.count(word)
+                                docID = docID + 1
+    return features_matrix
+
+#creation dico
+dico = makeDictionnary(X_training)
+#features_matrix = extract_features(dico, X_training, X_test)
+
 
 
