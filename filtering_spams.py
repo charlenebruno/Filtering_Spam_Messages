@@ -10,7 +10,9 @@ import pandas as pd
 
 #get data from text file
 messages = pd.read_csv('messages.txt', sep='\t')
+#messages.str.upper()
 messages.columns= ["nature", "message"]
+
 print(messages)
 print(type(messages))
 messages["nature"] = messages["nature"].map({'spam':1, 'ham':0})
@@ -42,14 +44,14 @@ def makeDictionnary(messagesArray):
     for i in messagesArray.index:
         #print(messagesArray[i])
         words = messagesArray[i].split(' ')
-        #print(words)
+#       print(words)
         for k in words:
             if(len(k)>2 and k.isalpha() == True): 
                 #Exclusion des mots moins de 2 lettres et avec des caractères non-aphabétiques
                 if  k.lower() not in dictionary:
                     dictionary.append(k.lower()) #Add the word in minuscule letter in the dictionary
     
-    #RECODER POUR AJOUTER LES MOTS AVEC DES VIRGULES, SINON CELA FAUSSERA LE CALCUL DE PROBABILITE (possibilité qu'une proba soit égale à zéro)
+    #RECODER POUR AJOUTER LES MOTS AVEC DES VIRGULES
     
     #print(dictionary)
     return dictionary
@@ -62,9 +64,13 @@ def extract_features(dictionary, messagesArray):
     docID = 0
     for i in messagesArray.index:
         words = messagesArray[i].split(' ')
+        words = [x.lower() for x in words] 
         for word in words:
-            if word.lower() in dictionary:
-                features_matrix[docID, dictionary.index(word.lower())] = words.count(word.lower()) 
+#            if word=="oops" : 
+#               print(word)
+            if word in dictionary:
+#                if word=="oops" : print("\t ok '",docID," \n")
+                features_matrix[docID, dictionary.index(word)] = words.count(word) 
         docID = docID + 1
     return features_matrix
 
@@ -82,16 +88,19 @@ def NaiveBayes(X,Y):
         return "LENGTH ERROR OF THE INPUT DATA !"
     else:
         I = len(Y)
-        y_predict = np.zeros((I,2))
+        y_predict = np.zeros((I,2)) 
+        Y.index = [i for i in range(I)]
         #iter = 0
         
         #Compute Phi_y_MLE = P(Y=1)
         Phi_y_MLE = Y.sum()/I
-#        
-#        for i in range(I):
-#            for j in range(2):
-#                
-#                
+        
+        for i in range(I):
+            for j in range(2):
+#                PROD = 1
+#                SUM = np.sum(Y,axis=0) #Sum of the values of all the lines by each column
+#                for k in SUM:
+#                    PROD = PROD*k
 #                y_predict[i][j] = 0
                 
         
