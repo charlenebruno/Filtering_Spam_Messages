@@ -24,7 +24,7 @@ train_set = messages_copy.sample(frac=0.75, random_state=0)
 print ('Training set')
 X_training = train_set["message"]
 Y_training = train_set["nature"]
-print(X_training)
+#print(X_training)
 print("Number of spams : ",Y_training.sum(),"/",len(Y_training)," (",round(Y_training.sum()/len(Y_training)*100,2),"%)\n")
 
 
@@ -44,14 +44,14 @@ def makeDictionnary(messagesArray):
     for i in messagesArray.index:
         #print(messagesArray[i])
         words = messagesArray[i].split(' ')
-#       print(words)
+#        print(words)
         for k in words:
             if(len(k)>2 and k.isalpha() == True): 
                 #Exclusion des mots moins de 2 lettres et avec des caractères non-aphabétiques
                 if  k.lower() not in dictionary:
                     dictionary.append(k.lower()) #Add the word in minuscule letter in the dictionary
     
-    #RECODER POUR AJOUTER LES MOTS AVEC DES VIRGULES
+    #RECODER POUR AJOUTER LES MOTS AVEC DES VIRGULES, SINON CELA FAUSSERA LE CALCUL DE PROBABILITE (possibilité qu'une proba soit égale à zéro)
     
     #print(dictionary)
     return dictionary
@@ -84,28 +84,38 @@ features_matrix_train = extract_features(dico_train, X_training)
 #Implementation of Naive Bayes programm
 def NaiveBayes(X,Y):
     if len(X)!=len(Y):
-        #In order to avoid X_test and Y_train as input data
+        #In order to avzoid X_test and Y_train as input data
         return "LENGTH ERROR OF THE INPUT DATA !"
     else:
-        I = len(Y)
+#        I = len(Y)
+        dico = makeDictionnary(X)
+        features_matrix = extract_features(dico, X)
+        (I, N) = features_matrix.shape
         y_predict = np.zeros((I,2)) 
         Y.index = [i for i in range(I)]
-        #iter = 0
         
         #Compute Phi_y_MLE = P(Y=1)
         Phi_y_MLE = Y.sum()/I
         
         for i in range(I):
             for j in range(2):
-#                PROD = 1
-#                SUM = np.sum(Y,axis=0) #Sum of the values of all the lines by each column
-#                for k in SUM:
-#                    PROD = PROD*k
-#                y_predict[i][j] = 0
-                
-        
-
-        y_predict = np.argmax(y_predict, axis=1) #Return the index of the max value of the line i. Dim(y_predict)=(1,I
+                Product = 1
+                for word in range(N):
+                    Sum = 0 #somme sur le numérateur de phi_n|y_MLE
+                    for line in range(I):
+                        if (features_matrix[line][word]>0 and Y[line]==j):
+                            Sum += features_matrix[line][word]
+                    if (j==0):
+                        Sum = Sum/(I-Y.sum()) #phi_n|y0_MLE
+                    else:
+                        Sum = Sum/Y.sum() #phi_n|y1_MLE
+                    Product *= Sum #On multiplie tous les phi_n|y_MLE
+                if (j==0):
+                    y_predict[i][j] = Product*(1-Phi_y_MLE)
+                else: 
+                    y_predict[i][j] = Product*Phi_y_MLE
+        print(y_predict)
+        y_predict = np.argmax(y_predict, axis=1) #Return the index of the max value of the line i. Dim(y_predict)=(1,I)
         return y_predict
 
 
@@ -113,4 +123,4 @@ def NaiveBayes(X,Y):
 #Y_training.index = [i for i in range(len(Y_training))]
 #Y_test.index = [i for i in range(len(Y_test))]
 
-
+NaiveBayes(X_training, Y_training)
