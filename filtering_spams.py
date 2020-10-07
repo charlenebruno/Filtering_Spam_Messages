@@ -46,23 +46,23 @@ Output param : dictionary => A list of words extracted from messagesArray
     A word appears only once in the dictionary in minuscule letter and have more than 2 letters
     The meaning of the words are not processed here
     """
-    
+
     #Initialize an empty list
-    dictionary=[] 
-    
+    dictionary=[]
+
     for i in messagesArray.index:
         #print(messagesArray[i])
         words = messagesArray[i].split(' ') #Turns the string messageArray[i] into a list of strings (words)
 #        print(words)
         for word in words:
-            if(len(word)>2 and word.isalpha() == True): 
+            if(len(word)>2 and word.isalpha() == True):
                 #Exclusion des mots moins de 2 lettres et avec des caractères non-aphabétiques
                 if  word.lower() not in dictionary:
                     #Add the word in minuscule letter in the dictionary in order to avoid to compare the same in CAPITAL and minuscule letter
-                    dictionary.append(word.lower()) 
-    
+                    dictionary.append(word.lower())
+
     #RECODER POUR AJOUTER LES MOTS AVEC DES VIRGULES, SINON CELA FAUSSERA LE CALCUL DE PROBABILITE (possibilité qu'une proba soit égale à zéro)
-    
+
     #print(dictionary)
     return dictionary
 
@@ -78,20 +78,20 @@ Output param :  features_matrix => An array
         The column is the word (example: column 0 is the word "opps", extract_features[0][0] = 1, means that the word is present
         Otherwise, it's not present)
     """
-    
+
     #Initalization
     features_matrix = np.zeros((len(messagesArray), len(dictionary)))
     docID = 0 #	message number/index in messagesArray
-    
+
     for i in messagesArray.index:
         words = messagesArray[i].split(' ')
-        words = [x.lower() for x in words] 
+        words = [x.lower() for x in words]
         for word in words:
-#            if word=="oops" : 
+#            if word=="oops" :
 #               print(word)
             if word in dictionary:
 #                if word=="oops" : print("\t ok '",docID," \n")
-                features_matrix[docID, dictionary.index(word)] = words.count(word) 
+                features_matrix[docID, dictionary.index(word)] = words.count(word)
         docID = docID + 1
     return features_matrix
 
@@ -115,12 +115,12 @@ def NaiveBayes(X,Y):
         dico = makeDictionnary(X)
         features_matrix = extract_features(dico, X)
         (I, N) = features_matrix.shape ##(nb of msg, nb of words)
-        y_predict = np.zeros((I,2)) 
+        y_predict = np.zeros((I,2))
         Y.index = [i for i in range(I)] #Rename the index of Y by [0,1,2,3,...,I-1,I]
-        
+
         #Compute Phi_y_MLE = P(Y=1)
         Phi_y_MLE = Y.sum()/I
-        
+
         #1st loop aims to fill the ith line of y_predict
         for i in range(I):
             #2nd loop aims to fill the yth column of y_predict indoer to compute P(x|y)*P(y) for a given y ={0,1}
@@ -129,36 +129,36 @@ def NaiveBayes(X,Y):
 #            print(i, message)
             for y in range(2):
                 Sum_ouside_1st_log = 0
-                
+
                 for wordIndex in range(n):
-                    
+
                     #Start computing phi_n|y_MLE which is the variable "Sum"
                     Sum_inside_1st_log = 0 #variable to store log(sum of indicator of xn(i)|y)
                     for line in range(I):
-                        
+
                         if (features_matrix[line][wordIndex]>0 and Y[line]==y):
                             Sum_inside_1st_log += features_matrix[line][wordIndex]
 #                    print(word, Sum_inside_1st_log)
                     if (Sum_inside_1st_log>0):
                         Sum_ouside_1st_log = Sum_ouside_1st_log + m.log(Sum_inside_1st_log)
-                    
+
                 if (y==0):
                     y_predict[i][y] = Sum_ouside_1st_log - n*m.log(I-Y.sum()) + m.log((1-Phi_y_MLE)) #P(x|y=0)*P(y=0)
-                else: 
+                else:
                     y_predict[i][y] = Sum_ouside_1st_log - n*m.log(Y.sum()) + m.log(Phi_y_MLE) #P(x|y=1)*P(y=1)
             print(i, y_predict[i])
 #        print(y_predict) #print both y* for y=0 and y=1
-        
-        #Return the index of the max value of the line i  
+
+        #Return the index of the max value of the line i
         y_predict = np.argmax(y_predict, axis=1) # y* computed, Dim(y_predict)=(1,I)
-        
+
         return y_predict
 
 
 #print("Starting NaiveBayes programm for the training sets")
 #print("\ty=0\t\ty=1")
 #y_predict_train = NaiveBayes(X_training, Y_training)
-        
+
 print("Starting NaiveBayes programm for the test sets")
 print("\ty=0\t\ty=1")
 y_predict_test = NaiveBayes(X_test, Y_test)
@@ -174,7 +174,7 @@ def confusionMatrix(Y_actual, Y_predict):
         TN = 0 # True Negative
         TP = 0 # True Positive
         FN = 0 # False Negative
-        FP = 0 # False Positive 
+        FP = 0 # False Positive
         for i in range(len(Y_actual)):
             if (Y_actual[i] == Y_predict[i] and Y_predict[i] == 0):
                 TN += 1
@@ -189,6 +189,11 @@ def confusionMatrix(Y_actual, Y_predict):
         print("\t\tPositive\t",TP,"\t\t\t\t",FP)
         print("y_predict")
         print("\t\tNegative\t",FN,"\t\t\t\t",TN)
+
+        precision = TP / TP + FP
+        recall = TP / TP + FN
+        print("precision : ",precision)
+        print("recall :  ",recall)
 
 
 confusionMatrix(Y_test, y_predict_test)
