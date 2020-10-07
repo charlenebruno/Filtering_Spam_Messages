@@ -150,8 +150,7 @@ def NaiveBayes(X,Y):
 #        print(y_predict) #print both y* for y=0 and y=1
         
         #Return the index of the max value of the line i  
-        #Dim(y_predict)=(1,I)
-        y_predict = np.argmax(y_predict, axis=1) # y*
+        y_predict = np.argmax(y_predict, axis=1) # y* computed, Dim(y_predict)=(1,I)
         
         return y_predict
 
@@ -159,15 +158,43 @@ def NaiveBayes(X,Y):
 #print("Starting NaiveBayes programm for the training sets")
 #print("\ty=0\t\ty=1")
 #y_predict_train = NaiveBayes(X_training, Y_training)
+        
 print("Starting NaiveBayes programm for the test sets")
 print("\ty=0\t\ty=1")
 y_predict_test = NaiveBayes(X_test, Y_test)
-##
-#df = pd.DataFrame(data=features_matrix_train,columns=dico_train)
-#Y_training.index = [i for i in range(3748)]
-#df.insert(0, "Y", Y_training, True) 
-#for word in dico_train:
-#    Y = df[(df[word]>0) & (df["Y"]==1)]
-#for word in dico_train:
-    
+
+
+
+def confusionMatrix(Y_actual, Y_predict):
+    if len(Y_actual)!=len(Y_predict):
+        #In order to avoid X_test and Y_train as input data
+        print("LENGTH ERROR IN THE INPUT DATA !")
+    else:
+        Y_actual.index = [i for i in range(len(Y_actual))] #Rename the index of Y by [0,1,2,3,...,I-1,I]
+        TN = 0 # True Negative
+        TP = 0 # True Positive
+        FN = 0 # False Negative
+        FP = 0 # False Positive 
+        for i in range(len(Y_actual)):
+            if (Y_actual[i] == Y_predict[i] and Y_predict[i] == 0):
+                TN += 1
+            elif (Y_actual[i] == Y_predict[i] and Y_predict[i] == 1):
+                TP += 1
+            elif (Y_actual[i] != Y_predict[i] and Y_predict[i] == 0):
+                FN += 1
+            else:
+                FP += 1
+        print("\t\t\t\t\ty_actual")
+        print("\t\t\t\tPositive\t\t\tNegative")
+        print("\t\tPositive\t",TP,"\t\t\t\t",FP)
+        print("y_predict")
+        print("\t\tNegative\t",FN,"\t\t\t\t",TN)
+
+
+confusionMatrix(Y_test, y_predict_test)
+
+
+
+
+
 
